@@ -2,23 +2,48 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import 'firebase/compat/auth';
 
-const config =  {
-    apiKey: "AIzaSyAbJJpuzxQlMB5-eP0sdxtJTmBPTdC3VtA",
-    authDomain: "crwn-db-3bb61.firebaseapp.com",
-    projectId: "crwn-db-3bb61",
-    storageBucket: "crwn-db-3bb61.appspot.com",
-    messagingSenderId: "451097138908",
-    appId: "1:451097138908:web:de39ab86f706a609b34619",
-    measurementId: "G-567LRFHPPF"
-  };
+const config = {
+  apiKey: "AIzaSyAF9FzLbHrk2r6N1wLOghRPFaOECiUuyYE",
+  authDomain: "crwn-db-new-6624d.firebaseapp.com",
+  projectId: "crwn-db-new-6624d",
+  storageBucket: "crwn-db-new-6624d.appspot.com",
+  messagingSenderId: "372009601401",
+  appId: "1:372009601401:web:98b492dd02ba16ef4e47a8",
+  measurementId: "G-V9X12CCF9W"
+};
 
-  firebase.initializeApp(config);
+firebase.initializeApp(config);
 
-  export const auth = firebase.auth();
-  export const firestore = firebase.firestore();
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+  if (!userAuth) return;
 
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({prompt: 'select_account'});
-  export const signInWithGoogle =() => auth.signInWithPopup(provider);
+  const userRef = firestore.doc(`users/${userAuth.uid}`);
 
-  export default firebase;
+  const snapShot = await userRef.get();
+
+  if (!snapShot.exists) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+    try {
+      await userRef.set({
+        displayName,
+        email,
+        createdAt,
+        ...additionalData
+      });
+    } catch (error) {
+      console.log('error creating user', error.message);
+    }
+  }
+
+  return userRef;
+};
+
+export const auth = firebase.auth();
+export const firestore = firebase.firestore();
+
+const provider = new firebase.auth.GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
+export const signInWithGoogle = () => auth.signInWithPopup(provider);
+
+export default firebase;
